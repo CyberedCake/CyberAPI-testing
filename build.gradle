@@ -1,0 +1,159 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+static String getGroup() { return "net.cybercake.cyberapi"; }
+static URL getWebsite() { return new URL("https://github.com/CyberedCake/CyberAPI"); }
+static String getDescription() { return "The new and improved CyberAPI!"; }
+static String[] getAuthors() { return new String[]{"CyberedCake"}; }
+static int getTargetJavaVersion() { return 17; }
+
+def getLatestTag = {
+    ByteArrayOutputStream stream = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags'
+        standardOutput = stream
+    }
+    String latestTag = stream.toString()
+    if(!latestTag.contains('.')) {
+        return 0
+    }
+    return latestTag // should be 'vMAJOR.MINOR.PATCH-BUILD[-TYPE]' with -TYPE being optional
+}
+
+def determinePatch = {
+    String tagSplit = getLatestTag().toString().split(".")[2].split("-")[0]
+    try {
+        Integer.parseInt(tagSplit)
+    } catch (NumberFormatException ignored) { return 0 }
+    return Integer.parseInt(tagSplit)+1
+}
+
+def determineBuild = {
+    String tagSplit = getLatestTag().toString().split("-")[1]
+    try {
+        Integer.parseInt(tagSplit);
+    } catch (NumberFormatException ignored) { return 0 } // should not be theoretically possible
+    return Integer.parseInt(tagSplit)+1
+}
+
+// version info
+def major = '3'
+def minor = '0'
+def patch = determinePatch()
+def basicVersion = major + "." + minor
+
+group = getGroup()
+version = basicVersion + "." + patch
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    group = getGroup()
+    version = basicVersion + "." + patch
+
+    def build = determineBuild()
+    def website = getWebsite()
+    def description = getDescription()
+    def authors = String.join(", ", getAuthors())
+
+    logger.quiet("> Found version " + version.toString() + " and build #" + build.toString())
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.release = getTargetJavaVersion()
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    jar {
+        tasks.withType(Javadoc) {
+            options.addStringOption("Xdoclint:none", '-quiet')
+        }
+        from ('build/build.properties')
+    }
+
+    java {
+        withSourcesJar()
+        withJavadocJar()
+
+        def javaVersion = JavaVersion.toVersion(getTargetJavaVersion())
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+        if(JavaVersion.current() < javaVersion) {
+            toolchain.languageVersion = JavaLanguageVersion.of(getTargetJavaVersion())
+        }
+    }
+
+    task createProperties(dependsOn: processResources) {
+        doLast {
+            new File("$buildDir/build.properties").withWriter { writer ->
+                Properties properties = new Properties()
+                properties['name'] = getRootProject().getName()
+                properties['buildFile'] = getBuildFile().getName()
+                properties['website'] = getWebsite().toString()
+                properties['user'] = System.getProperty("user.name")
+                properties['currentJavaVersion'] = System.getProperty("java.version")
+                properties['currentJavaVendor'] = System.getProperty("java.vendor")
+                properties['builderOS'] = System.getProperty("os.name")
+                properties['builderArch'] = System.getProperty("os.arch")
+                properties['builderVersion'] = System.getProperty("os.version")
+                properties['task'] = name
+                properties['group'] = getGroup()
+                properties['targetJavaVersion'] = String.valueOf(getTargetJavaVersion())
+                properties['built'] = new Date().toInstant().toEpochMilli().toString()
+                properties['buildNumber'] = String.valueOf(build)
+                properties['version'] = getVersion()
+                properties['description'] = this.getDescription()
+                properties.store writer, "CyberAPI Build Information\n(all information from the computer that built CyberAPI)"
+            }
+        }
+    }
+
+    classes {
+        dependsOn createProperties
+    }
+
+    javadoc {
+        configure(options) {
+            tags(
+                    'apiNote:a"API Note:"',
+                    'implNote:b"Implementation Note:"',
+                    'website:c"Website:"'
+            )
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/cyberedcake/cyberapi")
+            credentials {
+                username = System.getenv("USERNAME")
+                password = System.getenv("TOKEN")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
