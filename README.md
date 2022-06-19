@@ -1,2 +1,7 @@
 # CyberAPI-testing
-The new and improved CyberAPI!&lt;br>## TESTING ENVIRONMENT! Do not use!
+The new and improved CyberAPI!
+
+# TESTING ENVIRONMENT!
+Anything here is for testing only and it is not recommended you mess around with this.
+
+[CLICK HERE](https://github.com/CyberedCake/CyberAPI) to go back to the main repository
