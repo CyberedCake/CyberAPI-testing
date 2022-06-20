@@ -48,18 +48,18 @@ jobs:
         id: version
         uses: christian-draeger/read-properties@1.0.1
         with:
-          path: 'spigot/build/build.properties'
+          path: 'build/build.properties'
           property: 'version'
-      - name: Read Protocol
-        id: protocol
+      - name: Read Build Number
+        id: build
         uses: christian-draeger/read-properties@1.0.1
         with:
-          path: 'spigot/build/build.properties'
-          property: 'protocol'
+          path: 'build/build.properties'
+          property: 'buildNumber'
       - name: Release CyberAPI
         uses: ncipollo/release-action@v1.10.0
         with:
-          artifacts: spigot/build/libs/spigot-${{ steps.version.outputs.value }}.jar,spigot/build/libs/spigot-${{ steps.version.outputs.value }}-sources.jar,spigot/build/libs/spigot-${{ steps.version.outputs.value }}-javadoc.jar
+          artifacts: "build/libs/*.jar,!build/libs/cyberapi-${{ steps.version.outputs.value }}.jar"
           name: Version ${{ steps.version.outputs.value }}
-          tag: v${{ steps.version.outputs.value }}-spigot
+          tag: v${{ steps.version.outputs.value }}-${{ steps.build.outputs.value }}
           generateReleaseNotes: true
