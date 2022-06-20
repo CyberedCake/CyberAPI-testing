@@ -9,17 +9,22 @@ static String getDescription() { return "The new and improved CyberAPI!"; }
 static String[] getAuthors() { return new String[]{"CyberedCake"}; }
 static int getTargetJavaVersion() { return 17; }
 
+// version info
+def major = '3'
+def minor = '0'
+
 def getLatestTag = {
     ByteArrayOutputStream stream = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'describe', '--tags'
-        standardOutput = stream
+    try {
+        exec {
+            commandLine 'git', 'describe', '--tags'
+            standardOutput = stream
+        }
+    } catch (Exception exception){
+        logger.error '> Exception: ' + exception.toString() + ' (while checking tags, continuing with basic version number)'
+        return 1
     }
-    String latestTag = stream.toString()
-    if(!latestTag.contains('.')) {
-        return 0
-    }
-    return latestTag // should be 'vMAJOR.MINOR.PATCH-BUILD[-TYPE]' with -TYPE being optional
+    return stream.toString() // should be 'vMAJOR.MINOR.PATCH-BUILD[-TYPE]' with -TYPE being optional
 }
 
 def determinePatch = {
@@ -38,23 +43,34 @@ def determineBuild = {
     return Integer.parseInt(tagSplit)+1
 }
 
-// version info
-def major = '3'
-def minor = '0'
-def patch = determinePatch()
+def patch = 0
+def build = 0
+def setMinors = {
+    try {
+        patch = determinePatch()
+        build = determineBuild()
+    } catch (Exception exception) {
+        logger.error '> Exception, defaulting to '0' for patch and '0' for build: ' + exception.toString()
+    }
+}
 def basicVersion = major + "." + minor
 
 group = getGroup()
 version = basicVersion + "." + patch
 
-subprojects {
+ext {
+    fullVersion = version.toString()
+}
+
+subprojects { Project subProject ->
+    subProject.setBuildDir(this.getBuildDir())
+
     apply plugin: 'java'
     apply plugin: 'maven-publish'
 
     group = getGroup()
     version = basicVersion + "." + patch
 
-    def build = determineBuild()
     def website = getWebsite()
     def description = getDescription()
     def authors = String.join(", ", getAuthors())
@@ -76,35 +92,11 @@ subprojects {
         from javadoc.destinationDir
     }
 
-    artifacts {
-        archives sourcesJar
-        archives javadocJar
-    }
-
-    jar {
-        tasks.withType(Javadoc) {
-            options.addStringOption("Xdoclint:none", '-quiet')
-        }
-        from ('build/build.properties')
-    }
-
-    java {
-        withSourcesJar()
-        withJavadocJar()
-
-        def javaVersion = JavaVersion.toVersion(getTargetJavaVersion())
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-        if(JavaVersion.current() < javaVersion) {
-            toolchain.languageVersion = JavaLanguageVersion.of(getTargetJavaVersion())
-        }
-    }
-
-    task createProperties(dependsOn: processResources) {
+    task createProperties {
         doLast {
-            new File("$buildDir/build.properties").withWriter { writer ->
+            new File(getBuildDir().getAbsolutePath() + File.separator + "build.properties").withWriter { writer ->
                 Properties properties = new Properties()
-                properties['name'] = getRootProject().getName()
+                properties['name'] = getProject().getName()
                 properties['buildFile'] = getBuildFile().getName()
                 properties['website'] = getWebsite().toString()
                 properties['user'] = System.getProperty("user.name")
@@ -120,13 +112,58 @@ subprojects {
                 properties['buildNumber'] = String.valueOf(build)
                 properties['version'] = getVersion()
                 properties['description'] = this.getDescription()
-                properties.store writer, "CyberAPI Build Information\n(all information from the computer that built CyberAPI)"
+                properties.store writer, "CyberAPI Build Information {project: " + getProject().getName() + "}\n(all information from the computer that built CyberAPI)"
             }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'sonatype'
+            url = 'https://oss.sonatype.org/content/groups/public/'
+        }
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    processResources {
+        def props = [version: version]
+        inputs.properties props
+        filteringCharset 'UTF-8'
+        filesMatching('plugin.yml') {
+            expand props
         }
     }
 
     classes {
         dependsOn createProperties
+    }
+
+    jar {
+        tasks.withType(Javadoc) {
+            options.addStringOption("Xdoclint:none", '-quiet')
+        }
+        from (getBuildDir().getAbsolutePath() + File.separator + "build.properties")
+        manifest {
+            attributes 'fullVersion': fullVersion.toString()
+        }
+    }
+
+    java {
+        withSourcesJar()
+        withJavadocJar()
+
+        def javaVersion = JavaVersion.toVersion(getTargetJavaVersion())
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+        if(JavaVersion.current() < javaVersion) {
+            toolchain.languageVersion = JavaLanguageVersion.of(getTargetJavaVersion())
+        }
     }
 
     javadoc {

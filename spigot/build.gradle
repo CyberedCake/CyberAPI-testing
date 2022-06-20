@@ -1,17 +1,12 @@
-plugins {
-    id 'java'
-    id 'maven-publish'
-}
-
 repositories {
     mavenCentral()
     maven {
-        name = 'spigotmc-repo'
-        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
-    maven {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
     maven {
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
@@ -19,9 +14,6 @@ repositories {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/commons-io/commons-io
-    implementation 'commons-io:commons-io:2.11.0'
-
     // adventure API (https://docs.adventure.kyori.net/)
     compileOnly "net.kyori:adventure-api:4.11.0"
     compileOnly "net.kyori:adventure-text-serializer-legacy:4.11.0"
@@ -31,6 +23,4 @@ dependencies {
     // spigot and plugin hooks
     compileOnly 'org.spigotmc:spigot-api:1.19-R0.1-SNAPSHOT'
     compileOnly 'net.luckperms:api:5.4'
-
-    // project properties
 }
