@@ -1,9 +1,6 @@
 name: CyberAPI Spigot Workflow
 
-on:
-  push:
-    paths:
-    - 'spigot/**'
+on: [push]
  
 jobs:
   build:
@@ -31,19 +28,14 @@ jobs:
         uses: gradle/gradle-build-action@v2.2.0
         with:
           gradle-version: release-candidate
-      - name: Build Gradle
-        run: |
-          cd spigot/
-          gradle build --stacktrace
+      - name: Build & Publish Gradle
+        with:
+          arguments: --stacktrace
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3.1.0
         with:
           name: CyberAPI-Spigot-3.0.0.jar
           path: spigot/build/libs
-      - name: Publish Package
-        run: |
-          cd spigot/
-          gradle publish --stacktrace
         env:
           USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
