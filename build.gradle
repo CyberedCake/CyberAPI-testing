@@ -13,22 +13,28 @@ static int getTargetJavaVersion() { return 17; }
 def major = '3'
 def minor = '0'
 
-def getLatestTag = {
-    ByteArrayOutputStream stream = new ByteArrayOutputStream()
-    try {
+
+
+
+task fetch {
+    doFirst {
         exec {
-            commandLine 'git', 'describe', '--tags'
-            standardOutput = stream
+            commandLine 'git', 'fetch'
         }
-    } catch (Exception exception){
-        logger.error '> Exception: ' + exception.toString() + ' (while checking tags, continuing with basic version number)'
-        return 1
     }
-    return stream.toString() // should be 'vMAJOR.MINOR.PATCH-BUILD[-TYPE]' with -TYPE being optional
+}
+
+def getLatestTag = {
+    def tagInfo = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags'
+        standardOutput = tagInfo
+    }
+    return tagInfo.toString().strip()
 }
 
 def determinePatch = {
-    String tagSplit = getLatestTag().toString().split(".")[2].split("-")[0]
+    String tagSplit = getLatestTag().toString().split("\\.")[2].split("-")[0]
     try {
         Integer.parseInt(tagSplit)
     } catch (NumberFormatException ignored) { return 0 }
@@ -38,21 +44,22 @@ def determinePatch = {
 def determineBuild = {
     String tagSplit = getLatestTag().toString().split("-")[1]
     try {
-        Integer.parseInt(tagSplit);
+        Integer.parseInt(tagSplit.strip());
     } catch (NumberFormatException ignored) { return 0 } // should not be theoretically possible
     return Integer.parseInt(tagSplit)+1
 }
 
 def patch = 0
 def build = 0
-def setMinors = {
+def setBasic = {
     try {
         patch = determinePatch()
         build = determineBuild()
     } catch (Exception exception) {
-        logger.error '> Exception, defaulting to '0' for patch and '0' for build: ' + exception.toString()
+        logger.error '> Exception, an error occurred: ' + exception.toString()
     }
 }
+setBasic()
 def basicVersion = major + "." + minor
 
 group = getGroup()
@@ -69,7 +76,7 @@ subprojects { Project subProject ->
     apply plugin: 'maven-publish'
 
     group = getGroup()
-    version = basicVersion + "." + patch
+    version = basicVersion.toString() + "." + patch
 
     def website = getWebsite()
     def description = getDescription()
@@ -188,7 +195,7 @@ publishing {
             }
         }
     }
-    
+
     publications {
         gpr(MavenPublication) {
             from(components.java)
