@@ -20,6 +20,7 @@ def getLatestTag = "loading..."
 task fetch {
     doFirst {
         exec {
+            commandLine 'cd'
             commandLine 'git', 'fetch'
         }
     }
