@@ -19,10 +19,13 @@ def minor = '0'
 def getLatestTag = "loading..."
 task fetch {
     doFirst {
+        def information = new ByteArrayOutputStream()
         exec {
-            commandLine 'cd'
+            commandLine 'echo %cd%'
             commandLine 'git', 'fetch'
+            standardOutput = information
         }
+        logger.quiet information.toString()
     }
     def tagInfo = new ByteArrayOutputStream()
     exec {
