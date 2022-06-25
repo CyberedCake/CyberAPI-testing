@@ -1,6 +1,9 @@
+import groovy.json.JsonSlurper
+
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'org.tenne.rest' version '0.4.2'
 }
 
 static String getGroup() { return "net.cybercake.cyberapi"; }
@@ -16,24 +19,7 @@ def minor = '0'
 
 
 
-def getLatestTag = "loading..."
-task fetch {
-    doFirst {
-        def information = new ByteArrayOutputStream()
-        exec {
-            commandLine 'echo %cd%'
-            commandLine 'git', 'fetch'
-            standardOutput = information
-        }
-        logger.quiet information.toString()
-    }
-    def tagInfo = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'describe', '--tags'
-        standardOutput = tagInfo
-    }
-    getLatestTag = tagInfo.toString().strip()
-}
+def getLatestTag = new JsonSlurper().parse(new URL("https://api.github.com/repos/CyberedCake/CyberAPI-testing/releases/latest")).tag_name
 
 def determinePatch = {
     String tagSplit = getLatestTag.split("\\.")[2].split("-")[0]
