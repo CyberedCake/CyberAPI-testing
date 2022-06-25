@@ -47,17 +47,14 @@ def setBasic = {
         build = determineBuild()
     } catch (Exception exception) {
         logger.error '> Exception, an error occurred: ' + exception.toString()
-        exception.printStackTrace()
     }
 }
 setBasic()
 def basicVersion = major + "." + minor
 
-group = getGroup()
-version = basicVersion + "." + patch
-
-ext {
-    fullVersion = version.toString()
+allprojects {
+    group = getGroup()
+    version = basicVersion + "." + patch
 }
 
 subprojects { Project subProject ->
@@ -68,6 +65,8 @@ subprojects { Project subProject ->
 
     group = getGroup()
     version = basicVersion.toString() + "." + patch
+
+    def fullVersion = version.toString()
 
     def website = getWebsite()
     def description = getDescription()
@@ -174,7 +173,6 @@ subprojects { Project subProject ->
         }
     }
 }
-
 
 publishing {
     repositories {
