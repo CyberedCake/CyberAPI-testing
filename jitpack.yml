@@ -3,4 +3,6 @@ before_install:
   - source ./install-jdk.sh --feature 17 --license GPL
   - cd spigot/
 install:
-  - ./gradlew wrapper --gradle-version 7.4
+  - gradle wrapper --gradle-version 7.4
+  - gradle clean
+  - gradle build
