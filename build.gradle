@@ -101,6 +101,8 @@ subprojects { Project subProject ->
 
     task createProperties {
         doLast {
+            File file = new File(this.getBuildDir().getAbsolutePath() + File.separator + "cyberapi-" + getProject().getName() + "-build.properties");
+            if(!file.exists()) file.createNewFile()
             new File(this.getBuildDir().getAbsolutePath() + File.separator + "cyberapi-" + getProject().getName() + "-build.properties").withWriter { writer ->
                 Properties properties = new Properties()
                 properties['name'] = getProject().getName()
