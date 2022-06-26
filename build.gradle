@@ -49,6 +49,8 @@ def setBasic = {
             patch = patch+1
             build = build+1
         }
+        println "INFORMATION: " + String.valueOf(System.getenv("user.name") == "runner" || System.getenv("user.name") == "jitpack")
+        println "INFORMATION 2: " + System.getenv("user.name")
     } catch (Exception exception) {
         logger.error '> Exception, an error occurred: ' + exception.toString()
     }
