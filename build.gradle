@@ -37,29 +37,23 @@ def currentBuild = {
     } catch (NumberFormatException ignored) { return 0 }
 }
 
-println System.getProperty("user.name").toString()
+// runner or jitpack should add 1
 
 def patch = 0
 def build = 0
-def patchSetNext = 0
-def buildSetNext = 0
 def setBasic = {
     try {
-        patch = currentPatch()+1
-        build = currentBuild()+1
-        patchSetNext = patch+1
-        buildSetNext = build+1
+        patch = currentPatch()
+        build = currentBuild()
+        if((System.getenv("user.name") == "runner" || System.getenv("user.name") == "jitpack")) {
+            patch = patch+1
+            build = build+1
+        }
     } catch (Exception exception) {
         logger.error '> Exception, an error occurred: ' + exception.toString()
     }
 }
 setBasic()
-task setNext {
-    doFirst {
-        environment 'patchSetNext', String.valueOf(patchSetNext)
-        environment 'buildSetNext', String.valueOf(buildSetNext)
-    }
-}
 
 def basicVersion = major + "." + minor
 
