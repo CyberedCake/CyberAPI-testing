@@ -45,8 +45,8 @@ def patchSetNext = 0
 def buildSetNext = 0
 def setBasic = {
     try {
-        patch = currentPatch()
-        build = currentBuild()
+        patch = currentPatch()+1
+        build = currentBuild()+1
         patchSetNext = patch+1
         buildSetNext = build+1
     } catch (Exception exception) {
