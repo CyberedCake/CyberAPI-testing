@@ -50,8 +50,6 @@ def setBasic = {
             patch = patch+1
             build = build+1
         }
-        println "INFORMATION 1: " + String.valueOf(username == "runner" || username == "jitpack")
-        println "INFORMATION 2: " + username
     } catch (Exception exception) {
         logger.error '> Exception, an error occurred: ' + exception.toString()
     }
@@ -102,8 +100,11 @@ subprojects { Project subProject ->
     task createProperties {
         doLast {
             File file = new File(this.getBuildDir().getAbsolutePath() + File.separator + "cyberapi-" + getProject().getName() + "-build.properties");
-            if(!file.exists()) file.createNewFile()
-            new File(this.getBuildDir().getAbsolutePath() + File.separator + "cyberapi-" + getProject().getName() + "-build.properties").withWriter { writer ->
+            if(!file.exists()) {
+                file.getParentFile().mkdirs()
+                file.createNewFile()
+            }
+            file.withWriter { writer ->
                 Properties properties = new Properties()
                 properties['name'] = getProject().getName()
                 properties['buildFile'] = getBuildFile().getName()
