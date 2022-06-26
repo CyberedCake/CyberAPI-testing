@@ -66,8 +66,6 @@ ext {
 }
 
 subprojects { Project subProject ->
-    subProject.setBuildDir(this.getBuildDir())
-
     apply plugin: 'java'
     apply plugin: 'maven-publish'
 
@@ -87,9 +85,21 @@ subprojects { Project subProject ->
         options.release = getTargetJavaVersion()
     }
 
+    task copyArtifacts {
+        doLast {
+            def NEW_DIR = "${getRootProject().buildDir}/artifacts"
+            def SRC_DIR = "${buildDir}/libs"
+
+            ant.copy(todir: NEW_DIR) {
+                fileset(dir: SRC_DIR)
+            }
+        }
+    }
+
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'
         from sourceSets.main.allSource
+        finalizedBy(copyArtifacts)
     }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -150,20 +160,6 @@ subprojects { Project subProject ->
         }
     }
 
-    classes {
-        dependsOn createProperties
-    }
-
-    jar {
-        tasks.withType(Javadoc) {
-            options.addStringOption("Xdoclint:none", '-quiet')
-        }
-        from (this.getBuildDir().getAbsolutePath() + File.separator + "cyberapi-" + getProject().getName() + "-build.properties")
-        manifest {
-            attributes 'fullVersion': fullVersion.toString()
-        }
-    }
-
     java {
         withSourcesJar()
         withJavadocJar()
@@ -184,6 +180,20 @@ subprojects { Project subProject ->
                     'website:c"Website:"'
             )
         }
+    }
+
+    jar {
+        tasks.withType(Javadoc) {
+            options.addStringOption("Xdoclint:none", '-quiet')
+        }
+        from (this.getBuildDir().getAbsolutePath() + File.separator + "cyberapi-" + getProject().getName() + "-build.properties")
+        manifest {
+            attributes 'fullVersion': fullVersion.toString()
+        }
+    }
+
+    classes {
+        dependsOn createProperties
     }
 }
 
