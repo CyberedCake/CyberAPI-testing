@@ -54,7 +54,7 @@ jobs:
       - name: Release CyberAPI
         uses: ncipollo/release-action@v1.10.0
         with:
-          artifacts: "build/libs/*.jar,!build/libs/cyberapi-${{ steps.version.outputs.value }}.jar"
+          artifacts: "build/artifacts/*.jar"
           name: Version ${{ steps.version.outputs.value }}
           tag: v${{ steps.version.outputs.value }}-${{ steps.build.outputs.value }}
           generateReleaseNotes: true
