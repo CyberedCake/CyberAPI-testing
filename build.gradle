@@ -45,12 +45,13 @@ def setBasic = {
     try {
         patch = currentPatch()
         build = currentBuild()
-        if((System.getenv("user.name") == "runner" || System.getenv("user.name") == "jitpack")) {
+        String username = System.getProperty("user.name")
+        if((username == "runner" || username == "jitpack")) {
             patch = patch+1
             build = build+1
         }
-        println "INFORMATION: " + String.valueOf(System.getenv("user.name") == "runner" || System.getenv("user.name") == "jitpack")
-        println "INFORMATION 2: " + System.getenv("user.name")
+        println "INFORMATION 1: " + String.valueOf(username == "runner" || username == "jitpack")
+        println "INFORMATION 2: " + username
     } catch (Exception exception) {
         logger.error '> Exception, an error occurred: ' + exception.toString()
     }
