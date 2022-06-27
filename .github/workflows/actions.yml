@@ -57,4 +57,6 @@ jobs:
           artifacts: "build/artifacts/*.jar"
           name: Version ${{ steps.version.outputs.value }}
           tag: v${{ steps.version.outputs.value }}-${{ steps.build.outputs.value }}
+          body: |
+            **This is a testing environment, it is not recommended that you use these files!**
           generateReleaseNotes: true
