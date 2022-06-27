@@ -57,4 +57,6 @@ jobs:
           artifacts: "build/artifacts/*.jar"
           name: Version ${{ steps.version.outputs.value }}
           tag: v${{ steps.version.outputs.value }}-${{ steps.build.outputs.value }}
+          body: |
+            **It is not recommended you download the files from here, please use the [README's download link](https://github.com/CyberedCake/CyberAPI#how-to-install-and-use=)**
           generateReleaseNotes: true
