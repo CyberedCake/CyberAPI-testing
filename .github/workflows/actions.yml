@@ -58,5 +58,5 @@ jobs:
           name: Version ${{ steps.version.outputs.value }}
           tag: v${{ steps.version.outputs.value }}-${{ steps.build.outputs.value }}
           body: |
-            **This is a testing environment, it is not recommended that you use these files!**
+            **It is not recommended you download the files from here, please use the [README's download link](https://github.com/CyberedCake/CyberAPI)**
           generateReleaseNotes: true
