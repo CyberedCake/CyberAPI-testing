@@ -1,4 +1,5 @@
 # CyberAPI-testing
+[![](https://jitpack.io/v/CyberedCake/CyberAPI-testing.svg)](https://jitpack.io/#CyberedCake/CyberAPI-testing) <br>
 The new and improved CyberAPI!
 
 # TESTING ENVIRONMENT!
