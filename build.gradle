@@ -29,6 +29,7 @@ def currentPatch = {
     try {
         if(getLatestTag.split("\\.")[1].split("-")[0] != minor) {
             logger.quiet "> Found different minor versions, settings patch to '0'..."
+            differentMinorVersions = true
             return 0
         }
         return Integer.parseInt(tagSplit)
@@ -52,11 +53,8 @@ def setBasic = {
         build = currentBuild()
         String username = System.getProperty("user.name")
         if(username == "runner") { // check if github is building the plugin
-            patch = patch+1
+            if(!differentMinorVersions) patch = patch+1
             build = build+1
-            if(differentMinorVersions) {
-                patch = 0
-            }
             println '> Found using GitHub Runner, going to increment patch (' + String.valueOf(patch-1) + ' -> ' + String.valueOf(patch) + ') and build (' + String.valueOf(build-1) + ' -> ' + String.valueOf(patch) + ')'
         }
     } catch (Exception exception) {
