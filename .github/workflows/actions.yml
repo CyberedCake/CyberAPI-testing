@@ -32,10 +32,10 @@ jobs:
         uses: gradle/gradle-build-action@v2.2.0
         with:
           gradle-version: release-candidate
-      - name: Build & Publish Gradle
+      - name: Build Gradle
         uses: gradle/gradle-build-action@v2.2.0
         with:
-          arguments: build publish --stacktrace
+          arguments: build --stacktrace
         env:
           USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
