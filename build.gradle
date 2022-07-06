@@ -142,7 +142,7 @@ subprojects { Project subProject ->
                 properties['buildNumber'] = String.valueOf(build)
                 properties['version'] = getVersion()
                 properties['description'] = this.getDescription()
-                properties['testingEnvironment'] = true
+                properties['testingEnvironment'] = Boolean.TRUE.toString()
                 properties.store writer, "CyberAPI (TESTING ENVIRONMENT) Build Information {project: " + getProject().getName() + "}\n(all information from the computer that built CyberAPI)"
             }
         }
