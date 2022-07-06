@@ -8,8 +8,8 @@ plugins {
 }
 
 static String getGroup() { return "net.cybercake.cyberapi"; }
-static URL getWebsite() { return new URL("https://github.com/CyberedCake/CyberAPI"); }
-static String getDescription() { return "The new and improved CyberAPI!"; }
+static URL getWebsite() { return new URL("https://github.com/CyberedCake/CyberAPI-testing"); }
+static String getDescription() { return "The new and improved CyberAPI! (TESTING ENVIRONMENT)"; }
 static String[] getAuthors() { return new String[]{"CyberedCake"}; }
 static int getTargetJavaVersion() { return 17; }
 
@@ -22,7 +22,7 @@ def minor = '5'
 
 
 
-def getLatestTag = new JsonSlurper().parse(new URL("https://api.github.com/repos/CyberedCake/CyberAPI/releases/latest")).tag_name
+def getLatestTag = new JsonSlurper().parse(new URL("https://api.github.com/repos/CyberedCake/CyberAPI-testing/releases/latest")).tag_name
 def differentMinorVersions = false
 
 def currentPatch = {
@@ -142,7 +142,8 @@ subprojects { Project subProject ->
                 properties['buildNumber'] = String.valueOf(build)
                 properties['version'] = getVersion()
                 properties['description'] = this.getDescription()
-                properties.store writer, "CyberAPI Build Information {project: " + getProject().getName() + "}\n(all information from the computer that built CyberAPI)"
+                properties['testingEnvironment'] = true
+                properties.store writer, "CyberAPI (TESTING ENVIRONMENT) Build Information {project: " + getProject().getName() + "}\n(all information from the computer that built CyberAPI)"
             }
         }
     }
