@@ -40,7 +40,7 @@ jobs:
         with:
           path: 'build/common-build.properties'
           property: 'buildNumber'
-      - name: Read Version (major)
+      - name: Read Version
         id: version
         uses: christian-draeger/read-properties@1.0.1
         with:
