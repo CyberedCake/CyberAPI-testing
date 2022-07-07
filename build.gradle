@@ -20,10 +20,11 @@ static int getTargetJavaVersion() { return 17; }
 
 
 
+
 def getLatestTag = new JsonSlurper().parse(new URL("https://api.github.com/repos/CyberedCake/CyberAPI-testing/releases/latest")).tag_name
 
 def currentBuild = {
-    String tagSplit = getLatestTag.split("-")[1].replace("b", "")
+    String tagSplit = getLatestTag.replace("#", "")
     try {
         return Integer.parseInt(tagSplit)
     } catch (NumberFormatException ignored) {
@@ -115,8 +116,8 @@ subprojects { Project subProject ->
                 properties['group'] = getGroup()
                 properties['targetJavaVersion'] = String.valueOf(getTargetJavaVersion())
                 properties['built'] = new Date().toInstant().toEpochMilli().toString()
-                properties['version'] = String.valueOf(build)
-                properties['versionMajor'] = String.valueOf(this.version)
+                properties['buildNumber'] = String.valueOf(build)
+                properties['version'] = String.valueOf(this.version)
                 properties['description'] = this.getDescription()
                 properties['testingEnvironment'] = Boolean.TRUE.toString()
                 properties.store writer, "CyberAPI (TESTING ENVIRONMENT) Build Information {project: " + getProject().getName() + "}\n(all information from the computer that built CyberAPI)"
@@ -169,7 +170,7 @@ subprojects { Project subProject ->
 
         from (this.getBuildDir().getAbsolutePath() + File.separator + getProject().getName() + "-build.properties")
         manifest {
-            attributes 'version': '#' + String.valueOf(this.build)
+            attributes 'build': '#' + String.valueOf(this.build)
         }
     }
 
@@ -204,7 +205,7 @@ subprojects { Project subProject ->
 
         from (this.getBuildDir().getAbsolutePath() + File.separator + getProject().getName() + "-build.properties")
         manifest {
-            attributes 'version': "#" + String.valueOf(this.build)
+            attributes 'build': "#" + String.valueOf(this.build)
         }
     }
 }

@@ -39,13 +39,13 @@ jobs:
         uses: christian-draeger/read-properties@1.0.1
         with:
           path: 'build/common-build.properties'
-          property: 'version'
+          property: 'buildNumber'
       - name: Read Version (major)
         id: version
         uses: christian-draeger/read-properties@1.0.1
         with:
           path: 'build/common-build.properties'
-          property: 'versionMajor'
+          property: 'version'
       - name: Release CyberAPI
         uses: ncipollo/release-action@v1.10.0
         with:
