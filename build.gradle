@@ -47,13 +47,13 @@ def setBasic = {
 setBasic()
 
 group = getGroup()
-version = "v3"
+version = "3"
 
 def javaVersion = JavaVersion.toVersion(getTargetJavaVersion())
 sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
 
-logger.quiet("> Found version " + version.toString() + " and build #" + build.toString())
+logger.quiet("> Found version v" + version.toString() + " and build #" + build.toString())
 
 subprojects { Project subProject ->
     apply plugin: 'java'
