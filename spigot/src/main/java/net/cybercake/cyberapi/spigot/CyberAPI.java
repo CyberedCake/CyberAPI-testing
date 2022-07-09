@@ -796,7 +796,7 @@ public class CyberAPI extends JavaPlugin implements CommonManager {
          * @since 3.0.0
          */
         public String getVersionString() {
-            return "&fThe plugin &a" + getPluginName() + " &fis using CyberAPI &6SPIGOT &fversion &e" + getVersion() + " &6(" + getBuild() + ")&f!";
+            return "&fThe plugin &a" + getPluginName() + " &fis using CyberAPI &6SPIGOT &fbuild &e#" + getBuild() + "&f!";
         }
 
         /**
@@ -816,8 +816,8 @@ public class CyberAPI extends JavaPlugin implements CommonManager {
                 JsonElement element = JsonParser.parseReader(new InputStreamReader((InputStream)connection.getContent()));
                 try {
                     String tag = element.getAsJsonObject().get("tag_name").getAsString();
-                    latestVersion = tag.split("-")[0];
-                    latestBuild = Integer.parseInt(tag.split("-")[1]);
+                    latestVersion = getVersion();
+                    latestBuild = Integer.parseInt(tag);
                 } catch (Exception exception) {
                     log.error("An error occurred fetching the latest version for GitHub repo 'CyberAPI', tag=" + element.getAsJsonObject().get("tag_name").getAsString() + ": " + ChatColor.DARK_GRAY + exception.toString());
                 }
@@ -828,7 +828,7 @@ public class CyberAPI extends JavaPlugin implements CommonManager {
             net.md_5.bungee.api.ChatColor DEFAULT_WARN_LOG = net.md_5.bungee.api.ChatColor.of(new java.awt.Color(249, 241, 165));
             if(getBuild() != latestBuild) {
                 if(latestBuild - getBuild() > 0) {
-                    log.warn(DEFAULT_WARN_LOG + "CyberAPI is outdated! The latest version is " + ChatColor.GREEN + latestVersion + DEFAULT_WARN_LOG + ", using " + ChatColor.RED + getVersion() + ChatColor.GRAY + " (" + (latestBuild -  getBuild()) + " version(s) behind!)" + DEFAULT_WARN_LOG + "!");
+                    log.warn(DEFAULT_WARN_LOG + "CyberAPI is outdated! The latest build is #" + ChatColor.GREEN + latestBuild + DEFAULT_WARN_LOG + ", using #" + ChatColor.RED + getBuild() + ChatColor.GRAY + " (" + (latestBuild -  getBuild()) + " version(s) behind!)" + DEFAULT_WARN_LOG + "!");
                     log.warn(DEFAULT_WARN_LOG + "Notify author of " + ChatColor.GOLD + getPluginName() + DEFAULT_WARN_LOG + " to download latest CyberAPI at " + ChatColor.LIGHT_PURPLE + getWebsite().replace("https://", ""));
                 }
             }
