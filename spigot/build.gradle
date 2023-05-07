@@ -30,6 +30,7 @@ dependencies {
 
     // spigot libraries
     implementation 'me.lucko:commodore:2.2'
+    compileOnly 'io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT'
 
     // utils
     implementation 'org.reflections:reflections:0.10.2'
