@@ -1,5 +1,2 @@
 jdk:
   - openjdk17
-install:
-  - ./gradlew shadowJar --stacktrace
-  - ./gradlew clean
