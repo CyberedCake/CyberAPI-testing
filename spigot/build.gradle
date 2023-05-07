@@ -29,7 +29,7 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:2.11.3'
 
     // spigot libraries
-    compileOnly 'me.lucko:commodore:2.2'
+    implementation 'me.lucko:commodore:2.2'
 
     // utils
     implementation 'org.reflections:reflections:0.10.2'
