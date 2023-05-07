@@ -76,7 +76,7 @@ subprojects { Project subProject ->
 
     tasks.register('copyArtifacts') {
         doLast {
-            def NEW_DIR = "${getRootProject().rootDir}/artifacts"
+            def NEW_DIR = "${getRootProject().buildDir}/artifacts"
             def SRC_DIR = "${buildDir}/libs"
 
             ant.copy(todir: NEW_DIR) {
