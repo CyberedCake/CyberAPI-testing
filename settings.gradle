@@ -1,4 +1,4 @@
-rootProject.name = 'cyberapi'
+rootProject.name = 'cyberapi-dev'
 include 'common'
 include 'spigot'
 include 'bungee'
