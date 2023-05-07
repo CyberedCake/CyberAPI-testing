@@ -1,6 +1,10 @@
 package net.cybercake.cyberapi.spigot.chat;
 
+import net.cybercake.cyberapi.common.builders.settings.FeatureSupport;
 import net.cybercake.cyberapi.spigot.CyberAPI;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.ForwardingAudience;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
@@ -67,6 +71,10 @@ public class Log {
                 CyberLogEvent logEvent = new CyberLogEvent(stackTraceElement, level, (Boolean.TRUE.equals(CyberAPI.getInstance().getSettings().shouldShowPrefixInLogs()) ? "[" + CyberAPI.getInstance().getPrefix() + "] " : null), message);
                 Bukkit.getPluginManager().callEvent(logEvent);
                 if(logEvent.isCancelled()) return;
+                if(CyberAPI.getInstance().getAdventureAPISupport() != FeatureSupport.AUTO && CyberAPI.getInstance().getAdventureAPISupport() == FeatureSupport.SUPPORTED) {
+                    CyberAPI.getInstance().getConsoleAudience().sendMessage(UChat.component(message));
+                    return;
+                }
                 Bukkit.getLogger().log(logEvent.getLevel(), UChat.chat((logEvent.getPrefix() == null ? "" : logEvent.getPrefix()) + logEvent.getMessage()));
             });
         } catch (Exception exception) {
