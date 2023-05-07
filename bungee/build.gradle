@@ -1,0 +1,34 @@
+repositories {
+    mavenCentral()
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        url = uri('https://mvn.exceptionflug.de/repository/exceptionflug-public/')
+    }
+}
+
+dependencies {
+    // adventure API (https://docs.adventure.kyori.net/)
+    implementation "net.kyori:adventure-text-serializer-legacy:4.13.1"
+    implementation "net.kyori:adventure-text-serializer-plain:4.13.1"
+
+    compileOnly "net.kyori:adventure-api:4.13.1"
+    compileOnly 'net.kyori:adventure-text-minimessage:4.13.1'
+
+    // bungeecord and plugin hooks
+    compileOnly 'net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT'
+    compileOnly 'net.luckperms:api:5.4'
+    compileOnly 'dev.simplix:protocolize-api:2.2.6'
+
+    // utils
+    implementation 'org.reflections:reflections:0.10.2'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+}
+
+shadowJar {
+    relocate 'javassist', 'net.cybercake.cyberapi.dependencies.javassist'
+    relocate 'org.reflections', 'net.cybercake.cyberapi.dependencies.reflections'
+    relocate 'org.apache.commons.lang3', 'net.cybercake.cyberapi.dependencies.apache.commons'
+}

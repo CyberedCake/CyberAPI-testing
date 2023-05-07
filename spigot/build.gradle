@@ -1,0 +1,44 @@
+repositories {
+    mavenCentral()
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+    maven { url "https://repo.dmulloy2.net/repository/public/" }
+    maven { url "https://libraries.minecraft.net" }
+    maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+}
+
+dependencies {
+    // adventure API (https://docs.adventure.kyori.net/)
+    compileOnly "net.kyori:adventure-api:4.13.1"
+    compileOnly "net.kyori:adventure-text-serializer-legacy:4.13.1"
+    compileOnly "net.kyori:adventure-text-minimessage:4.13.1"
+
+    // spigot and plugin hooks
+    compileOnly 'com.comphenix.protocol:ProtocolLib:5.0.0-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT'
+    compileOnly 'net.luckperms:api:5.4'
+    compileOnly 'me.clip:placeholderapi:2.11.3'
+
+    // spigot libraries
+    implementation 'me.lucko:commodore:2.2'
+
+    // utils
+    implementation 'org.reflections:reflections:0.10.2'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+}
+
+shadowJar {
+    relocate 'javassist', 'net.cybercake.cyberapi.dependencies.javassist'
+    relocate 'org.reflections', 'net.cybercake.cyberapi.dependencies.reflections'
+    relocate 'org.apache.commons.lang3', 'net.cybercake.cyberapi.dependencies.apache.commons'
+    relocate 'javax.annotation', 'net.cybercake.cyberapi.dependencies.annotations.javax'
+}

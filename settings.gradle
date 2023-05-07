@@ -1,0 +1,4 @@
+rootProject.name = 'cyberapi'
+include 'common'
+include 'spigot'
+include 'bungee'

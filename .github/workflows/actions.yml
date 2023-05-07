@@ -1,0 +1,68 @@
+name: CyberAPI (dev)
+
+on:
+  push:
+    branches: ["main"]
+ 
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [17]
+      fail-fast: true
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Actions Checkout
+        uses: actions/checkout@v3.0.2
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v3.3.0
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          cache: 'gradle'
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1.0.4
+      - name: Set Gradle Version
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          gradle-version: release-candidate
+      - name: Build Gradle
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          arguments: shadowJar --stacktrace
+      - name: Read Version
+        id: version
+        uses: christian-draeger/read-properties@1.0.1
+        with:
+          path: 'build/common-build.properties'
+          property: 'version'
+      - name: Read Build Number
+        id: build
+        uses: christian-draeger/read-properties@1.0.1
+        with:
+          path: 'build/common-build.properties'
+          property: 'buildNumber'
+      - name: Release CyberAPI
+        uses: ncipollo/release-action@v1.10.0
+        with:
+          artifacts: "build/artifacts/*.jar"
+          name: "Build #${{ steps.build.outputs.value }}"
+          tag: ${{ steps.build.outputs.value }}
+          commit: main
+          body: |
+            **Related Commit:**
+            ```
+            ${{ github.event.head_commit.message }}
+            ```
+            [click here to view!](https://github.com/${{ github.event.repository.full_name }}/commit/${{ github.event.head_commit.id }})
+            
+            <br>
+            
+            **It is not recommended you download the files from here, please use the [README Installation Guide](https://github.com/${{ github.event.repository.full_name }}#how-to-install-and-use)**
+            
+            If you really want to though, you can [click here](https://jitpack.io/#${{ github.event.repository.full_name }}/${{ steps.build.outputs.value }}) for the JitPack link!
+          generateReleaseNotes: true

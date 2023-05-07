@@ -1,0 +1,215 @@
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'org.tenne.rest' version '0.4.2'
+    id 'com.github.johnrengelman.shadow' version "8.1.1"
+}
+
+static String getGroup() { return "net.cybercake.cyberapi"; }
+static URL getWebsite() { return new URL("https://github.com/CyberedCake/CyberAPI-testing"); }
+static String getDescription() { return "The new and improved CyberAPI! (DEVELOPER EDITION - EXPERIMENTAL ONLY)"; }
+static String[] getAuthors() { return new String[]{"CyberedCake"}; }
+static int getTargetJavaVersion() { return 17; }
+
+
+
+
+
+
+def getLatestTag = new JsonSlurper().parse(new URL("https://api.github.com/repos/CyberedCake/CyberAPI-testing/releases/latest")).tag_name
+
+def currentBuild = {
+    String tagSplit = getLatestTag
+    try {
+        return Integer.parseInt(tagSplit)
+    } catch (NumberFormatException ignored) {
+        return 0
+    }
+}
+
+// runner or jitpack should add 1
+
+def build = 0
+def setBasic = {
+    try {
+        build = currentBuild()
+        String username = System.getProperty("user.name")
+        if(username == "runner") { // check if github is building the plugin
+            build = build+1
+            println '> Found using GitHub Runner, going to increment build (' + String.valueOf(build-1) + ' -> ' + String.valueOf(build) + ')'
+        }
+    } catch (Exception exception) {
+        logger.error '> Exception, an error occurred: ' + exception.toString()
+    }
+}
+setBasic()
+
+group = getGroup()
+version = "v3"
+
+def actualVersion = version
+
+def javaVersion = JavaVersion.toVersion(getTargetJavaVersion())
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+
+logger.quiet("> Found version " + version.toString() + " and build #" + build.toString())
+
+subprojects { Project subProject ->
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    group = getGroup()
+    version = this.version
+
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.register('copyArtifacts') {
+        doLast {
+            def NEW_DIR = "${getRootProject().buildDir}/artifacts"
+            def SRC_DIR = "${buildDir}/libs"
+
+            ant.copy(todir: NEW_DIR) {
+                fileset(dir: SRC_DIR,
+                        includes: "**/cyberapi-*.jar"
+                )
+            }
+        }
+    }
+
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+
+    tasks.register('createProperties') {
+        doLast {
+            File file = new File(this.getBuildDir().getAbsolutePath() + File.separator + getProject().getName() + "-build.properties");
+            if (!file.exists()) {
+                file.getParentFile().mkdirs()
+                file.createNewFile()
+            }
+            file.withWriter { writer ->
+                Properties properties = new Properties()
+                properties['name'] = getProject().getName()
+                properties['buildFile'] = getBuildFile().getName()
+                properties['website'] = getWebsite().toString()
+                properties['user'] = System.getProperty("user.name")
+                properties['currentJavaVersion'] = System.getProperty("java.version")
+                properties['currentJavaVendor'] = System.getProperty("java.vendor")
+                properties['builderOS'] = System.getProperty("os.name")
+                properties['builderArch'] = System.getProperty("os.arch")
+                properties['builderVersion'] = System.getProperty("os.version")
+                properties['task'] = name
+                properties['group'] = getGroup()
+                properties['targetJavaVersion'] = String.valueOf(getTargetJavaVersion())
+                properties['built'] = new Date().toInstant().toEpochMilli().toString()
+                properties['buildNumber'] = String.valueOf(build)
+                properties['version'] = String.valueOf(actualVersion)
+                properties['description'] = this.getDescription()
+                properties['testingEnvironment'] = Boolean.TRUE.toString()
+                properties.store writer, "CyberAPI Build Information {project: " + getProject().getName() + "}\n(all information from the computer that built CyberAPI)\n--> THIS IS A TESTING ENVIRONMENT. PROCEED WITH CAUTION. <--"
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'sonatype'
+            url = 'https://oss.sonatype.org/content/groups/public/'
+        }
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+        archives shadowJar
+    }
+
+    javadoc {
+        configure(options) {
+            tags(
+                    'apiNote:a"API Note:"',
+                    'implNote:b"Implementation Note:"',
+                    'website:c"Website:"',
+                    'author:d"Author:"'
+            )
+        }
+    }
+
+    jar {
+        dependsOn(shadowJar)
+        sourcesJar.setArchiveFileName("cyberapi-" + getProject().getName() + "-sources-b" + build + ".jar")
+        javadocJar.setArchiveFileName("cyberapi-" + getProject().getName() + "-javadoc-b" + build + ".jar")
+
+        from (this.getBuildDir().getAbsolutePath() + File.separator + getProject().getName() + "-build.properties")
+        manifest {
+            attributes 'version': String.valueOf(actualVersion)
+            attributes 'buildNumber': String.valueOf(build)
+        }
+    }
+
+    classes {
+        dependsOn createProperties
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId project.group
+                artifactId project.name
+                version build
+
+                from components.java
+            }
+        }
+    }
+
+    // if(!subProject.getName().contains("common")) shadowJar.finalizedBy copyArtifacts
+
+    dependencies {
+        if(!subProject.getName().contains("common")) {
+            // cyberapi
+            implementation project(path: ':common')
+        }
+    }
+
+    shadowJar {
+        dependsOn javadocJar
+        dependsOn sourcesJar
+
+        archiveFileName.set("cyberapi-" + getProject().getName() + "-b" + build.toString() + ".jar")
+
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+
+        tasks.withType(Javadoc).configureEach {
+            options.addStringOption("Xdoclint:none", '-quiet')
+        }
+
+        from (this.getBuildDir().getAbsolutePath() + File.separator + getProject().getName() + "-build.properties")
+        manifest {
+            attributes 'version': String.valueOf(actualVersion)
+            attributes 'buildNumber': String.valueOf(build)
+        }
+
+        mergeServiceFiles()
+    }
+
+    shadowJar.finalizedBy copyArtifacts
+}
+
+wrapper {
+    gradleVersion = "8.0.1"
+    distributionType = Wrapper.DistributionType.ALL
+}
